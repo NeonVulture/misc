@@ -27,15 +27,16 @@ int main()
     float Vce = 0.2; // Saturation Mode Only
     float Vcb = -0.5; // Saturation Mode Only
 
-    cout << "Welcome to BJT Circuit Solver!\n\n";
+    cout << "Welcome to BJT Circuit Solver V.1.0!\n\n";
     sleep(2);
-    cout << "This progam will calculate all node voltages & currents.\n\n";
+    cout << "This progam will calculate all node voltages & currents by performing a DC analysis.\n\n";
     sleep(2);
     cout << "Before entering the values make sure and keep in mind that:\n";
     cout << "1. You already know the values of RB, RC, RE, VBB, VCC, VEE.\n";
     cout << "2. RB must be a single resistor. If not, modify the circuit (i.e. use Thevenin's Theorem).\n";
-    cout << "3. The BJT Must be a NPN transistor (values will be off for pnp transistor)\n";
-    cout << "4. Vbe is assummed to be equal to 0.7V. If problems state Vbe is something else, note that calculations may be a bit off\n\n";
+    cout << "3. Do not use this if there is a current source in the circuit";
+    cout << "4. The BJT Must be a NPN transistor (values will be wrong for pnp transistor).\n";
+    cout << "5. Vbe is assummed to be equal to 0.7V. If problems state Vbe is something else, note that calculations may be a bit off.\n\n";
     sleep(2);
     cout << "Let's Begin:\n\n";
     cout << "What is the value of VBB? ";
@@ -44,42 +45,42 @@ int main()
         cout << "Invalid input\n";
         exit(42);
     }
-    cout << "You entered " << VBB << "V\n\n";
+    cout << "You entered VBB = " << VBB << "V\n\n";
     cout << "What is the value of RB? (If there is no resistor, enter 1) ";
     cin >> RB;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
-    cout << "You entered " << RB << " Ohms\n\n";
+    cout << "You entered RB = " << RB << " Ohms\n\n";
     cout << "What is the value of VCC? ";
     cin >> VCC;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
-    cout << "You entered " << VCC << "V\n\n";
+    cout << "You entered VCC = " << VCC << "V\n\n";
     cout << "What is the value of RC? (If there is no resistor, enter 1) ";
     cin >> RC;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
-    cout << "You entered " << RC << " Ohms\n\n";
+    cout << "You entered RC = " << RC << " Ohms\n\n";
     cout << "What is the value of VEE? ";
     cin >> VEE;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
-    cout << "You entered " << VEE << "V\n\n";
+    cout << "You entered VEE = " << VEE << "V\n\n";
     cout << "What is the value of RE? (If there is no resistor, enter 1) ";
     cin >> RE;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
-    cout << "You entered " << RE << " Ohms\n\n";
+    cout << "You entered RE = " << RE << " Ohms\n\n";
     cout << "Lastly, what is the value of beta? (If beta is very large, enter 999). ";
     cin >> beta;
     if (cin.fail()) {
@@ -91,11 +92,11 @@ int main()
     float Ib, Ic, Ie, Vb, Vc, Ve;
 
     // Calculate the currents
-    if (beta == 999) {
+    if (beta == 999) { // calculations if beta is very large
         Ib = 0; // Neglect any base current
-        Ie = (VBB - Vbe)/RE; // See EX5
-        Ic = Ie; // for beta >> 1
-    } else {
+        Ie = (VBB - Vbe - VEE)/RE; // See EX5
+        Ic = Ie;
+    } else { // calculations for a given beta
         Ib = (VBB - VEE - Vbe)/(RB + ((beta + 1) * RE));
         Ie = (beta + 1) * Ib;
         Ic = beta * Ib;
