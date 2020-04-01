@@ -34,19 +34,19 @@ int main()
     cout << "Before entering the values make sure and keep in mind that:\n";
     cout << "1. You already know the values of RB, RC, RE, VBB, VCC, VEE.\n";
     cout << "2. RB must be a single resistor. If not, modify the circuit (i.e. use Thevenin's Theorem).\n";
-    cout << "3. Do not use this if there is a current source in the circuit";
+    cout << "3. Do not use this if there is a current source in the circuit\n";
     cout << "4. The BJT Must be a NPN transistor (values will be wrong for pnp transistor).\n";
     cout << "5. Vbe is assummed to be equal to 0.7V. If problems state Vbe is something else, note that calculations may be a bit off.\n\n";
     sleep(2);
     cout << "Let's Begin:\n\n";
-    cout << "What is the value of VBB? ";
+    cout << "What is the value of VBB? (in volts)";
     cin >> VBB;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
     cout << "You entered VBB = " << VBB << "V\n\n";
-    cout << "What is the value of RB? (If there is no resistor, enter 1) ";
+    cout << "What is the value of RB (in Ohms)? (If there is no resistor, enter 1) ";
     cin >> RB;
     if (cin.fail()) {
         cout << "Invalid input\n";
