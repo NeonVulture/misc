@@ -12,29 +12,69 @@
 using namespace std;
 
 void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
+    
     float GAIN;
     float V_TH = 0.025; // Thermal voltage constant equal to 25mV
-    float gm = Ic/V_TH;
-    float r_pi = Beta/gm; // For Hybrid-Pi Model Approach
-    float re = V_TH/Ic; // For T_Model Approach
+    float gm = (Ic*1e-3)/V_TH;
+    float r_pi = (Beta/gm); // For Hybrid-Pi Model Approach
+    float re = V_TH/(Ic*1e-3); // For T_Model Approach
+    float R; // Total resistance at the collector in the Pi Model
     
-    if (Re = 0) {
+    if (Re == 0) {
         // Case 1: (Re is absent)
         // Use Hybrid-Pi Model Approach
-        // GAIN = r_pi/(r_pi+Rsig) * -gmR where R is the total resistance at the collector 
+        cout << "\nCalculated parameters for the PI Model:\n";
+        cout << "gm = " << gm*1e3 << "mA/V\n";
+        cout << "r_pi = " << r_pi << " Ohms.\n";
+        
+        // Calculate the total resistance at the collector in the Pi Model
+        if (Rc == 0) {
+            R = RL;
+        } else if (RL == 0) {
+            R = Rc;
+        } else { // This also takes care of the case if Rc = RL = 0
+            R = (Rc*RL)/(Rc + RL); // Rc||RL
+        }
+        if (Rsig == 0 && Rb == 0) {
+            // Subcase 1: (Rsig & Rb are absent)
+            // GAIN = r_pi * -gmR 
+            GAIN = r_pi * gm * R; 
+        } else if (Rsig == 0) {
+            // Subcase 2: (Rsig is absent but Rb is present)
+            // GAIN =  Rb||r_pi * -gmR 
+            GAIN = ((Rb * r_pi)/(Rb + r_pi)) * gm * R;
+        } else if (Rb == 0) {
+            // Subcase 3: (Rb is absent but Rsig is present)
+            // GAIN = r_pi/(r_pi+Rsig) * -gmR 
+            GAIN = (r_pi/(r_pi + Rsig)) * gm * R;
+        } else {
+            // Subacase 4: (Rsig and Rb are both present)
+            // GAIN = R_IN/(R_IN + Rsig) * -gm * R
+            float R_IN = (Rb * r_pi)/(Rb + r_pi); // Input resistance at base (Rb||r_pi)
+            GAIN = (R_IN/(R_IN + Rsig)) * gm * R;
+        }
     }
+    
+    // Case 2 (Re is present)
+    // Use T-Model approach
+    
+    cout << "\n\nGAIN = " << GAIN << " V/V";
 }
 
 void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
     int V_TH = 0.025; // Thermal voltage constant equal to 25mV
 }
 
+void General_BJT(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
+    int V_TH = 0.025; // Thermal voltage constant equal to 25mV
+}
+
 void PROMPT() {
     int choice;
-    cout << "This program will calculate the gain either a BJT or MOSFET Circuit.\n";
-    cout << "Before using this calculator, make sure that:\n";
+    cout << "This program will calculate the gain either a BJT or MOSFET Circuit.\n\n";
+    cout << "Before using this calculator, make sure that:\n\n";
     cout << "1. You have drawn the AC circuit of the BJT \n";
-    cout << "2. You know the value of the collector current (Ic) \n";
+    cout << "2. You know the value of the collector current (Ic) \n\n";
     cout << "Below is a set of BJT circuits. Select the type of circuit you wish to calculate the gain of\n";
     cout << "1. Common-Emitter Amplifier\n";
     cout << "2. Common-Collector/Emitter-Follower\n";
@@ -92,16 +132,16 @@ void PROMPT() {
         cout << "You entered RL = " << RL << " Ohms.\n";
     }
     
-    cout << "\nWhat is the value of Ic (in miliamps)? (Enter 0 if Ic is absent)\nIc = ";
+    cout << "\nWhat is the value of Ic (in miliamps)?\nIc = ";
     cin >> Ic;
     if (cin.fail()) {
         cout << "\nInvalid input!";
         exit(42);
     } else {
-        cout << "You entered Ic = " << Ic*1e3 << " mA.\n";
+        cout << "You entered Ic = " << Ic*1e-3 << " A.\n";
     }
     
-    cout << "\nLastly, what is the value of Beta (if beta is very large, enter 999)?\n Beta = ;
+    cout << "\nLastly, what is the value of Beta (if beta is very large, enter 999)?\nBeta = ";
     cin >> Beta;
     if (cin.fail()) {
         cout << "\nInvalid input!";
