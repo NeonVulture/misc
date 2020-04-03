@@ -56,10 +56,9 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
     } else {
         // Case 2 (Re is present)
         // Use T-Model approach
-        
         //Calculate the Reflected Resistance to Base (Re+re)(beta+1) depending if beta is >> 1 or not
         float RRB; // Reflected Resistance to Base (RRB)
-        if (Beta = 999) { // Beta is very large or infinity
+        if (Beta == 999) { // Beta is very large or infinity
             RRB = 1; // 
         } else {
             RRB = (Re + re) * (Beta + 1);
@@ -122,9 +121,72 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
 }
 
 void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
-    int V_TH = 0.025; // Thermal voltage constant equal to 25mV
-    // Only T-Model is appropriate 
+     // Only T-Model is appropriate 
+    float V_TH = 0.025; // Thermal voltage constant equal to 25mV
+    float re = V_TH/(Ic*1e-3); // For T_Model Approach
+    float GAIN;
     
+    cout << "\nCalculated parameters for T-Model:\n";
+    cout << "re = " << re << " Ohms.\n";
+    
+    float RRB = (Re + re) * (Beta + 1); // Reflected Resistance to Base (ONLY IF Beta is some value)
+    
+    float RE; // Total resistance in the emitter
+    if (Re == 0 && RL == 0) {
+        // Do Not Compute
+        cout << "\nLooks like the circuit is a Common-Emitter Amp or General BJT";    
+    } else if (Rc == 0 && RL != 0) {
+        RE = RL;
+    } else if (RL == 0 && Rc != 0) {
+        RE = Rc;
+    } else {
+        RE = (Rc * RL)/(Rc + RL); // Rc||RL
+    }
+    
+    cout << "RE' = " << RE << " Ohms.\n";
+    
+    float Av = RE/(RE+re); // Voltage Gain Av
+    
+    cout << "Av = " << Av << "V/V.\n";
+    
+    float Zb; // The total resistance at the base including Rb (if present) but excluding Rsig (if present)
+        // NOTE: Calculation for Zb does not depend on Rsig but does depend on Beta
+        
+    if (Beta == 999 && Rb != 0) { // Beta is very large AND Rb is present        
+        //(1)
+        Zb = Rb;
+    } else if (Beta == 999 && Rb == 0) { // Beta is VERY LARGE AND Rb is absent  
+        //(2)
+        Zb = 1; // FLAG
+    } else if (Beta != 999 && Rb == 0) { // Beta is SOME VALUE AND Rb is absent   
+        //(3)
+        Zb = RRB;
+    } else { // Beta is some fixed value like 100 AND Rb is present
+        //(4)
+        Zb = (Rb * RRB)/ (Rb + RRB); // Rb||RRB
+    }
+    
+    cout << "Zb = " << Zb << " Ohms\n";
+    
+    if (Rsig == 0 && Rb == 0) { 
+        // Subcase 1: Rsig and Rb are both absent and Zb is either (2) or (3)
+        GAIN = Zb * Av; //Zb = 1 or Zb = (re+re)(Beta + 1);
+    } else if (Rsig == 0 && Rb != 0) {
+        // Subcase 2: If Rsig is absent but Rb is present and Zb is either (1) or (4)
+        GAIN == Zb * Av; // Zb = Rb or Zb = Rb||RRB 
+    } else if (Rb == 0 && Rsig != 0) { 
+        // Subcase 3: If Rb is absent but Rsig is present and Zb is either (2) or (3)
+        if (Zb == 1) { // beta is large
+        GAIN = Rsig * Av;
+    } else { // beta is some value
+        GAIN = (Zb * Rc)/((Zb + Rsig)*RE);  
+    }
+        } else {
+            // Subcase 4: If both Rsig and Rb are both present
+                GAIN = (Zb/(Zb + Rsig)) * Av; // Zb = RRB||Rb or Zb = Rb
+        }
+    
+    cout << "\nGAIN = " << GAIN << " V/V"; 
 }
 
 void General_BJT(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
@@ -204,12 +266,7 @@ void BJT_PROMPT() {
     
     cout << "\nLastly, what is the value of Beta (if beta is very large, enter 999)?\nBeta = ";
     cin >> Beta;
-    if (choice != 1 || choice != 2 || choice != 3) {
-        cout << "\nInvalid input!";
-        exit(42);
-    } else {
-        cout << "You entered Beta = " << Beta;
-    }
+    cout << "\nYou entered Beta = " << Beta ; 
     
     if (choice == 1) {
         cout << "\nYou selected: Common-Emitter Amplifier Circuit\n";
