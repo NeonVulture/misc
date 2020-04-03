@@ -30,39 +30,42 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
         // Calculate the total resistance at the collector in the Pi Model
         if (Rc == 0) {
             R = RL;
+            cout << "R = " << R << " Ohms\n";
         } else if (RL == 0) {
             R = Rc;
+            cout << "R = " << R << " Ohms\n";
         } else { // This also takes care of the case if Rc = RL = 0
             R = (Rc*RL)/(Rc + RL); // Rc||RL
+            cout << "R = " << R << " Ohms\n";
         }
+        
         if (Rsig == 0 && Rb == 0) {
             // Subcase 1: (Rsig & Rb are absent)
-            // GAIN = r_pi * -gmR 
+            // GAIN = r_pi * -gmR
+            cout << "Case 1\n";
             GAIN = r_pi * gm * R; 
         } else if (Rsig == 0 && Rb !=0) {
             // Subcase 2: (Rsig is absent but Rb is present)
             // GAIN =  Rb||r_pi * -gmR 
             GAIN = ((Rb * r_pi)/(Rb + r_pi)) * gm * R;
+            cout << "Case 2\n";
         } else if (Rb == 0 && Rsig != 0) {
             // Subcase 3: (Rb is absent but Rsig is present)
             // GAIN = r_pi/(r_pi+Rsig) * -gmR 
             GAIN = (r_pi/(r_pi + Rsig)) * gm * R;
+            cout << "Case 3\n";
         } else {
             // Subacase 4: (Rsig and Rb are both present)
             // GAIN = R_IN/(R_IN + Rsig) * -gm * R
             float R_IN = (Rb * r_pi)/(Rb + r_pi); // Input resistance at base (Rb||r_pi)
             GAIN = (R_IN/(R_IN + Rsig)) * gm * R;
+            cout << "Case 4\n";
         }
     } else {
         // Case 2 (Re is present)
         // Use T-Model approach
         //Calculate the Reflected Resistance to Base (Re+re)(beta+1) depending if beta is >> 1 or not
-        float RRB; // Reflected Resistance to Base (RRB)
-        if (Beta == 999) { // Beta is very large or infinity
-            RRB = 1; // 
-        } else {
-            RRB = (Re + re) * (Beta + 1);
-        }
+        float RRB = (Re + re) * (Beta + 1); // Reflected Resistance to Base (RRB)
         
         float Zc; // Total resistance of collector
         
@@ -70,50 +73,61 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
             // Do Not Calculate
             cout << "\nLooks like the circuit is an emitter follower. Retry the program.";
             exit(42);
-        } else if (Rc == 0 && RL != 0) {
+        } else if (Rc == 0) {
             Zc = RL;
-        } else if (RL == 0 && Rc != 0) {
+            cout << "Zc = " << Zc << " Ohms\n";
+        } else if (RL == 0) {
             Zc = Rc;
+            cout << "Zc = " << Zc << " Ohms\n";
         } else {
             Zc = (Rc * RL)/(Rc + RL); // Rc||RL
+            cout << "Zc = Rc||RL = " << Zc << " Ohms\n";
         }
         
         float Ze = Re + re; // Total resistance of emitter
+        cout << "Ze = " << Ze << " Ohms\n";
         
         float Zb; // The total resistance at the base including Rb (if present) but excluding Rsig (if present)
         // NOTE: Calculation for Zb does not depend on Rsig but does depend on Beta
         
-        if (RRB == 1 && Rb != 0) { // Beta is very large AND Rb is present        
-            //(1)
+        if (Beta == 999 && Rb != 0) { // Beta is very large AND Rb is present        
+            // Consider only Rb
             Zb = Rb;
-        } else if (RRB == 1 && Rb == 0) { // Beta is VERY LARGE AND Rb is absent  
+            cout << "Zb = " << Zb << " Ohms\n";
+        } else if (Beta == 999 && Rb == 0) { // Beta is VERY LARGE AND Rb is absent  
             //(2)
             Zb = 1; // FLAG
-        } else if (RRB != 1 && Rb == 0) { // Beta is SOME VALUE AND Rb is absent   
+        } else if (Beta != 999 && Rb == 0) { // Beta is SOME VALUE AND Rb is absent   
             //(3)
             Zb = RRB;
+            cout << "Zb = " << Zb << " Ohms\n";
         } else { // Beta is some fixed value like 100 AND Rb is present
             //(4)
-            Zb = (Rb * RRB)/ (Rb + RRB); // Rb||RRB
+            Zb = (Rb * RRB)/(Rb + RRB); // Rb||RRB
+            cout << "Zb = " << Zb << " Ohms\n";
         }
         
         if (Rsig == 0 && Rb == 0) { 
-            // Subcase 1: Rsig and Rb are both absent and Zb is either (2) or (3)
-            GAIN = Zb * (Zc/Ze); //Zb = 1 or Zb = (re+re)(Beta + 1);
+            // Subcase 1: Rsig and Rb are both absent and Zb
+            cout << "\nCase 1\n";
+            GAIN = Zb * (Zc/Ze); // Zb = (re+re)(Beta + 1) or Zb = 1 (i.e beta is VERY LARGE)
         }
-        else if (Rsig == 0 && Rb != 0) {
-            // Subcase 2: If Rsig is absent but Rb is present and Zb is either (1) or (4)
+        else if (Rsig == 0) {
+            // Subcase 2: If Rsig is absent but Rb is present
+            cout << "\nCase 2\n";
             GAIN == Zb * (Zc/Ze); // Zb = Rb or Zb = Rb||RRB 
-        } else if (Rb == 0 && Rsig != 0) { 
-             // Subcase 3: If Rb is absent but Rsig is present and Zb is either (2) or (3)
-             if (Zb == 1) { // beta is large
+        } else if (Rb == 0) {
+            // Subcase 3: If Rb is absent but Rsig is present and Zb is either (2) or (3)
+            cout << "\nCase 3\n";
+            if (Zb == 1) { // beta is large
                 GAIN = Rsig * (Zc/Ze);
-             } else { // beta is some value
+            } else { // beta is some value
                 GAIN = (Zb * Rc)/((Zb + Rsig)*Ze);  
-             }
+            }
         } else {
             // Subcase 4: If both Rsig and Rb are both present
-                GAIN = (Zb/(Zb + Rsig)) * (Zc/Ze); // Zb = RRB||Rb or Zb = Rb
+            cout << "\nCase 4\n";
+            GAIN = (Zb/(Zb + Rsig)) * (Zc/Ze); // Zb = RRB||Rb or Zb = Rb
         }
     }
     
@@ -127,12 +141,13 @@ void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, f
     float GAIN;
     
     cout << "\nCalculated parameters for T-Model:\n";
-    cout << "re = " << re << " Ohms.\n";
+    cout << "re = 25mV/Ic = " << re << " Ohms.\n";
     
     float RE; // Total resistance in the emitter
     if (Re == 0 && RL == 0) {
         // Do Not Compute
         cout << "\nLooks like the circuit is a Common-Emitter Amp or General BJT";    
+        exit(30);
     } else if (Re == 0) {
         RE = RL;
         cout << "RE' = RL = " << RE << " Ohms.\n";
@@ -153,15 +168,7 @@ void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, f
     float Zb; // The total resistance at the base including Rb (if present) but excluding Rsig (if present)
     // NOTE: Calculation for Zb does not depend on Rsig but does depend on Beta
         
-    if (Beta == 999 && Rb != 0) { // Beta is very large AND Rb is present        
-        //(1)
-        Zb = Rb;
-        cout << "Zb = Rb = " << Zb << " Ohms.\n";
-    } else if (Beta == 999 && Rb == 0) { // Beta is VERY LARGE AND Rb is absent  
-        //(2)
-        Zb = 1; // FLAG
-    } else if (Beta != 999 && Rb == 0) { // Beta is SOME VALUE AND Rb is absent   
-        //(3)
+    if (Rb == 0) { // Beta is SOME VALUE but Rb is absent   
         Zb = RRB;
         cout << "Zb = (RE'+re)(Beta+1) = " << Zb << " Ohms.\n";
     } else { // Beta is some fixed value like 100 AND Rb is present
@@ -176,18 +183,15 @@ void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, f
         cout << "\nCase 1\n";
         GAIN = Av;
     } else if (Rsig == 0 && Rb == 0) {
-        // Subcase 2: Rsig and Rb are both absent and Zb is either (2) or (3)
+        // Subcase 2a: Rsig and Rb are both absent ( Zb = RRB = (RE'+re)(Beta + 1) )
+        // Subcase 2b: Rsig is absent but Rb is present (Zb = Rb||RRB)
         cout << "\nCase 2\n";
-        GAIN = Zb * Av; //Zb = 1 or Zb = (re+re)(Beta + 1); 
-    } else if (Rsig == 0) {
-        // Subcase 3: If Rsig is absent but Rb is present and Zb is either (1) or (4)
-        cout << "\nCase 3\n";
-        GAIN == Zb * Av; // Zb = Rb or Zb = Rb||RRB 
+        GAIN = Zb * Av; 
     } else  {
-        // Subcase 4a: If Rb is absent but Rsig is present and Zb is either (2) or (3)
+        // Subcase 4a: If Rb is absent but Rsig is present
         // Subcase 4b: If Rb and Rsig are both present
-        cout << "\nCase 4\n";
-        GAIN = (Zb/(Zb + Rsig)) * Av; // Zb = RRB = (RE+re)(Beta + 1) or Zb = RRB||Rb or Zb = Rb
+        cout << "\nCase 3\n";
+        GAIN = (Zb/(Zb + Rsig)) * Av; // Zb = RRB = (RE+re)(Beta + 1) or Zb = Rb||RRB
     } 
     
     cout << "GAIN = " << GAIN << " V/V"; 
