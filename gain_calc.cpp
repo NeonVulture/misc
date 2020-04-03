@@ -129,8 +129,6 @@ void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, f
     cout << "\nCalculated parameters for T-Model:\n";
     cout << "re = " << re << " Ohms.\n";
     
-    float RRB = (Re + re) * (Beta + 1); // Reflected Resistance to Base (ONLY IF Beta is some value)
-    
     float RE; // Total resistance in the emitter
     if (Re == 0 && RL == 0) {
         // Do Not Compute
@@ -144,6 +142,8 @@ void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, f
     }
     
     cout << "RE' = " << RE << " Ohms.\n";
+    
+    float RRB = (Re + re) * (Beta + 1); // Reflected Resistance to Base (ONLY IF Beta is some value)
     
     float Av = RE/(RE+re); // Voltage Gain Av
     
