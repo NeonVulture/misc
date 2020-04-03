@@ -39,11 +39,11 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
             // Subcase 1: (Rsig & Rb are absent)
             // GAIN = r_pi * -gmR 
             GAIN = r_pi * gm * R; 
-        } else if (Rsig == 0 &) {
+        } else if (Rsig == 0 && Rb !=0) {
             // Subcase 2: (Rsig is absent but Rb is present)
             // GAIN =  Rb||r_pi * -gmR 
             GAIN = ((Rb * r_pi)/(Rb + r_pi)) * gm * R;
-        } else if (Rb == 0) {
+        } else if (Rb == 0 && Rsig != 0) {
             // Subcase 3: (Rb is absent but Rsig is present)
             // GAIN = r_pi/(r_pi+Rsig) * -gmR 
             GAIN = (r_pi/(r_pi + Rsig)) * gm * R;
@@ -67,7 +67,7 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
         
         float Zc; // Total resistance of collector
         
-        if (Rc == 0 & RL == 0) {
+        if (Rc == 0 && RL == 0) {
             // Do Not Calculate
             cout << "\nLooks like the circuit is an emitter follower. Retry the program.";
             exit(42);
@@ -85,32 +85,36 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
         // NOTE: Calculation for Zb does not depend on Rsig but does depend on Beta
         
         if (RRB == 1 && Rb != 0) { // Beta is very large AND Rb is present        
+            //(1)
             Zb = Rb;
-        } else if (RRB == 1 && Rb == 0) { // Beta is very large AND Rb is absent  
-            Zb = 0; // FLAG
-        } else if (RRB != 1 && Rb == 0) { // Beta is some value AND Rb is absent   
+        } else if (RRB == 1 && Rb == 0) { // Beta is VERY LARGE AND Rb is absent  
+            //(2)
+            Zb = 1; // FLAG
+        } else if (RRB != 1 && Rb == 0) { // Beta is SOME VALUE AND Rb is absent   
+            //(3)
             Zb = RRB;
-        } else { // Beta is some fixed value like 100
-            Zb = (Rb * RRB)/ (Rb + RRB);
+        } else { // Beta is some fixed value like 100 AND Rb is present
+            //(4)
+            Zb = (Rb * RRB)/ (Rb + RRB); // Rb||RRB
         }
         
         if (Rsig == 0 && Rb == 0) { 
-            if (Zb = 0) {
-                // Subacase 1a: Rsig and Rb are both absent & Beta is very large;
-                GAIN = Zc/Ze; // Zc/Ze
-            } else {
-                //
-            }
+            // Subcase 1: Rsig and Rb are both absent and Zb is either (2) or (3)
+            GAIN = Zb * (Zc/Ze); //Zb = 1 or Zb = (re+re)(Beta + 1);
         }
         else if (Rsig == 0 && Rb != 0) {
-            // Subcase 2: If Rsig is absent but Rb is present
-            GAIN = ;
+            // Subcase 2: If Rsig is absent but Rb is present and Zb is either (1) or (4)
+            GAIN == Zb * (Zc/Ze); // Zb = Rb or Zb = Rb||RRB 
         } else if (Rb == 0 && Rsig != 0) { 
-             // Subcase 3: If Rb is absent but Rsig is present
-             GAIN = ;
+             // Subcase 3: If Rb is absent but Rsig is present and Zb is either (2) or (3)
+             if (Zb == 1) { // beta is large
+                GAIN = Rsig * (Zc/Ze);
+             } else { // beta is some value
+                GAIN = (Zb * Rc)/((Zb + Rsig)*Ze);  
+             }
         } else {
             // Subcase 4: If both Rsig and Rb are both present
-            GAIN = (Zb/(Zb + Rsig)) * (Zc/Ze);
+                GAIN = (Zb/(Zb + Rsig)) * (Zc/Ze); // Zb = RRB||Rb or Zb = Rb
         }
     }
     
