@@ -39,7 +39,7 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
             // Subcase 1: (Rsig & Rb are absent)
             // GAIN = r_pi * -gmR 
             GAIN = r_pi * gm * R; 
-        } else if (Rsig == 0) {
+        } else if (Rsig == 0 &) {
             // Subcase 2: (Rsig is absent but Rb is present)
             // GAIN =  Rb||r_pi * -gmR 
             GAIN = ((Rb * r_pi)/(Rb + r_pi)) * gm * R;
@@ -53,25 +53,82 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
             float R_IN = (Rb * r_pi)/(Rb + r_pi); // Input resistance at base (Rb||r_pi)
             GAIN = (R_IN/(R_IN + Rsig)) * gm * R;
         }
+    } else {
+        // Case 2 (Re is present)
+        // Use T-Model approach
+        
+        //Calculate the Reflected Resistance to Base (Re+re)(beta+1) depending if beta is >> 1 or not
+        float RRB; // Reflected Resistance to Base (RRB)
+        if (Beta = 999) { // Beta is very large or infinity
+            RRB = 1; // 
+        } else {
+            RRB = (Re + re) * (Beta + 1);
+        }
+        
+        float Zc; // Total resistance of collector
+        
+        if (Rc == 0 & RL == 0) {
+            // Do Not Calculate
+            cout << "\nLooks like the circuit is an emitter follower. Retry the program.";
+            exit(42);
+        } else if (Rc == 0 && RL != 0) {
+            Zc = RL;
+        } else if (RL == 0 && Rc != 0) {
+            Zc = Rc;
+        } else {
+            Zc = (Rc * RL)/(Rc + RL); // Rc||RL
+        }
+        
+        float Ze = Re + re; // Total resistance of emitter
+        
+        float Zb; // The total resistance at the base including Rb (if present) but excluding Rsig (if present)
+        // NOTE: Calculation for Zb does not depend on Rsig but does depend on Beta
+        
+        if (RRB == 1 && Rb != 0) { // Beta is very large AND Rb is present        
+            Zb = Rb;
+        } else if (RRB == 1 && Rb == 0) { // Beta is very large AND Rb is absent  
+            Zb = 0; // FLAG
+        } else if (RRB != 1 && Rb == 0) { // Beta is some value AND Rb is absent   
+            Zb = RRB;
+        } else { // Beta is some fixed value like 100
+            Zb = (Rb * RRB)/ (Rb + RRB);
+        }
+        
+        if (Rsig == 0 && Rb == 0) { 
+            if (Zb = 0) {
+                // Subacase 1a: Rsig and Rb are both absent & Beta is very large;
+                GAIN = Zc/Ze; // Zc/Ze
+            } else {
+                //
+            }
+        }
+        else if (Rsig == 0 && Rb != 0) {
+            // Subcase 2: If Rsig is absent but Rb is present
+            GAIN = ;
+        } else if (Rb == 0 && Rsig != 0) { 
+             // Subcase 3: If Rb is absent but Rsig is present
+             GAIN = ;
+        } else {
+            // Subcase 4: If both Rsig and Rb are both present
+            GAIN = (Zb/(Zb + Rsig)) * (Zc/Ze);
+        }
     }
-    
-    // Case 2 (Re is present)
-    // Use T-Model approach
     
     cout << "\n\nGAIN = " << GAIN << " V/V";
 }
 
 void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
     int V_TH = 0.025; // Thermal voltage constant equal to 25mV
+    // Only T-Model is appropriate 
+    
 }
 
 void General_BJT(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
     int V_TH = 0.025; // Thermal voltage constant equal to 25mV
 }
 
-void PROMPT() {
+void BJT_PROMPT() {
     int choice;
-    cout << "This program will calculate the gain either a BJT or MOSFET Circuit.\n\n";
     cout << "Before using this calculator, make sure that:\n\n";
     cout << "1. You have drawn the AC circuit of the BJT \n";
     cout << "2. You know the value of the collector current (Ic) \n\n";
@@ -143,7 +200,7 @@ void PROMPT() {
     
     cout << "\nLastly, what is the value of Beta (if beta is very large, enter 999)?\nBeta = ";
     cin >> Beta;
-    if (cin.fail()) {
+    if (choice != 1 || choice != 2 || choice != 3) {
         cout << "\nInvalid input!";
         exit(42);
     } else {
@@ -167,8 +224,28 @@ void PROMPT() {
     
 }
 
+void MOSFET_PROMPT() {
+    cout << "\n\nComing Soon!";
+}
+
 int main()
 {
-    PROMPT();
+    int choice;
+    cout << "This program will calculate the gain of either a BJT or MOSFET circuit.\n\n";
+    cout << "Select the circuit you wish to anaylize.\n\n";
+    cout << "1. BJT\n";
+    cout << "2. MOSFET\n\n";
+    cout << "Choice: ";
+    cin >> choice;
+    
+    if (choice == 1) {
+        BJT_PROMPT();
+    } else if (choice == 2) {
+        MOSFET_PROMPT();
+    } else {
+        cout << "\nInvalid Choice!";
+        exit(42);
+    }
+    
     return 0;
 }
