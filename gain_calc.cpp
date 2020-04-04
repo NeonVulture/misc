@@ -39,26 +39,30 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
             cout << "R = " << R << " Ohms\n";
         }
         
+        float Avo = gm * R;
+        
+        cout << "Avo = " << Avo << " V/V\n";
+        
         if (Rsig == 0 && Rb == 0) {
             // Subcase 1: (Rsig & Rb are absent)
             // GAIN = r_pi * -gmR
             cout << "Case 1\n";
-            GAIN = r_pi * gm * R; 
+            GAIN = r_pi * Avo; 
         } else if (Rsig == 0 && Rb !=0) {
             // Subcase 2: (Rsig is absent but Rb is present)
             // GAIN =  Rb||r_pi * -gmR 
-            GAIN = ((Rb * r_pi)/(Rb + r_pi)) * gm * R;
+            GAIN = ((Rb * r_pi)/(Rb + r_pi)) * Avo;
             cout << "Case 2\n";
         } else if (Rb == 0 && Rsig != 0) {
             // Subcase 3: (Rb is absent but Rsig is present)
             // GAIN = r_pi/(r_pi+Rsig) * -gmR 
-            GAIN = (r_pi/(r_pi + Rsig)) * gm * R;
+            GAIN = (r_pi/(r_pi + Rsig)) * Avo;
             cout << "Case 3\n";
         } else {
             // Subacase 4: (Rsig and Rb are both present)
             // GAIN = R_IN/(R_IN + Rsig) * -gm * R
             float R_IN = (Rb * r_pi)/(Rb + r_pi); // Input resistance at base (Rb||r_pi)
-            GAIN = (R_IN/(R_IN + Rsig)) * gm * R;
+            GAIN = (R_IN/(R_IN + Rsig)) * Avo;
             cout << "Case 4\n";
         }
     } else {
