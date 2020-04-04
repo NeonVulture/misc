@@ -39,49 +39,55 @@ int main()
     cout << "5. Vbe is assummed to be equal to 0.7V. If problems state Vbe is something else, note that calculations may be a bit off.\n\n";
     sleep(2);
     cout << "Let's Begin:\n\n";
-    cout << "What is the value of VBB? (in volts)";
+    cout << "What is the value of VBB?\nVBB = ";
     cin >> VBB;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
     cout << "You entered VBB = " << VBB << "V\n\n";
-    cout << "What is the value of RB (in Ohms)? (If there is no resistor, enter 1) ";
+    
+    cout << "What is the value of RB? (For example, if 10K, you may type 10000 or 10e3)\nIf there is no resistor, enter 1\nRB = ";
     cin >> RB;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
     cout << "You entered RB = " << RB << " Ohms\n\n";
-    cout << "What is the value of VCC? ";
+    
+    cout << "What is the value of VCC?\nVCC = ";
     cin >> VCC;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
     cout << "You entered VCC = " << VCC << "V\n\n";
-    cout << "What is the value of RC? (If there is no resistor, enter 1) ";
+  
+    cout << "What is the value of RC? (If there is no resistor, enter 1)\nRC = ";
     cin >> RC;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
     cout << "You entered RC = " << RC << " Ohms\n\n";
-    cout << "What is the value of VEE? ";
+    
+    cout << "What is the value of VEE?\nVEE = ";
     cin >> VEE;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
     cout << "You entered VEE = " << VEE << "V\n\n";
-    cout << "What is the value of RE? (If there is no resistor, enter 1) ";
+    
+  cout << "What is the value of RE? (If there is no resistor, enter 1)\RE = ";
     cin >> RE;
     if (cin.fail()) {
         cout << "Invalid input\n";
         exit(42);
     }
     cout << "You entered RE = " << RE << " Ohms\n\n";
-    cout << "Lastly, what is the value of beta? (If beta is very large, enter 999). ";
+  
+    cout << "Lastly, what is the value of beta? (If beta is very large, enter 999).\n Beta = ";
     cin >> beta;
     if (cin.fail()) {
         cout << "Invalid input\n";
