@@ -79,7 +79,7 @@ int main()
     }
     cout << "You entered VEE = " << VEE << "V\n\n";
     
-  cout << "What is the value of RE? (If there is no resistor, enter 1)\RE = ";
+  cout << "What is the value of RE? (If there is no resistor, enter 1)\nRE = ";
     cin >> RE;
     if (cin.fail()) {
         cout << "Invalid input\n";
@@ -87,7 +87,7 @@ int main()
     }
     cout << "You entered RE = " << RE << " Ohms\n\n";
   
-    cout << "Lastly, what is the value of beta? (If beta is very large, enter 999).\n Beta = ";
+    cout << "Lastly, what is the value of beta? (If beta is very large, enter 999).\nBeta = ";
     cin >> beta;
     if (cin.fail()) {
         cout << "Invalid input\n";
