@@ -23,6 +23,7 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
     if (Re == 0) {
         // Case 1: (Re is absent)
         // Use Hybrid-Pi Model Approach
+        cout << "Notation:\nAvo = Terminal Voltage Gain\nGv = Overall Voltage Gain\n";
         cout << "\nCalculated parameters for the PI Model:\n";
         cout << "gm = " << gm*1e3 << "mA/V\n";
         cout << "r_pi = " << r_pi << " Ohms.\n";
@@ -68,8 +69,14 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
     } else {
         // Case 2 (Re is present)
         // Use T-Model approach
-        //Calculate the Reflected Resistance to Base (Re+re)(beta+1) depending if beta is >> 1 or not
-        float RRB = (Re + re) * (Beta + 1); // Reflected Resistance to Base (RRB)
+        
+        //Calculate the Reflected Resistance to Base (Re+re)(beta+1) depending if beta is very large or not
+        float RRB;
+        if (Beta == 999) {
+            RRB = 1;
+        } else {
+            RRB = (Re + re) * (Beta + 1); // Reflected Resistance to Base (RRB)
+        }
         
         float Zc; // Total resistance of collector
         
@@ -88,7 +95,7 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
             cout << "Zc = Rc||RL = " << Zc << " Ohms\n";
         }
         
-        float Ze = Re + re; // Total resistance of emitter
+        float Ze = Re + re; // Total resistance of emitter (Re may be 0)
         cout << "Ze = " << Ze << " Ohms\n";
         
         float Zb; // The total resistance at the base including Rb (if present) but excluding Rsig (if present)
@@ -99,38 +106,36 @@ void Common_Emitter_Amp(float &Rsig, float &Rb, float &Rc, float &Re, float &RL,
             Zb = Rb;
             cout << "Zb = " << Zb << " Ohms\n";
         } else if (Beta == 999 && Rb == 0) { // Beta is VERY LARGE AND Rb is absent  
-            //(2)
             Zb = 1; // FLAG
         } else if (Beta != 999 && Rb == 0) { // Beta is SOME VALUE AND Rb is absent   
-            //(3)
+            // Zb = RRB = (Beta + 1)(Re + re)
             Zb = RRB;
             cout << "Zb = " << Zb << " Ohms\n";
         } else { // Beta is some fixed value like 100 AND Rb is present
-            //(4)
-            Zb = (Rb * RRB)/(Rb + RRB); // Rb||RRB
+            // Zb = Rb||RRB
+            Zb = (Rb * RRB)/(Rb + RRB);
             cout << "Zb = " << Zb << " Ohms\n";
         }
         
-        if (Rsig == 0 && Rb == 0) { 
-            // Subcase 1: Rsig and Rb are both absent and Zb
-            cout << "\nCase 1\n";
-            GAIN = Zb * (Zc/Ze); // Zb = (re+re)(Beta + 1) or Zb = 1 (i.e beta is VERY LARGE)
-        }
-        else if (Rsig == 0) {
-            // Subcase 2: If Rsig is absent but Rb is present
-            cout << "\nCase 2\n";
-            GAIN == Zb * (Zc/Ze); // Zb = Rb or Zb = Rb||RRB 
+        if (Rsig == 0) { 
+            // Subcase 1: Rsig is absent and Rb may or may not be absent
+            cout << "\nCase 1: Rsig is absent\n";
+            cout << "Avo = " << Zc/Ze << " V/V";
+            GAIN = Zb * (Zc/Ze); // Zb = (re+re)(Beta + 1) or Zb = 1 (i.e beta is VERY LARGE) or Zb = Rb or Zb = Rb||RRB 
         } else if (Rb == 0) {
-            // Subcase 3: If Rb is absent but Rsig is present and Zb is either (2) or (3)
-            cout << "\nCase 3\n";
+            // Subcase 2: If Rb is absent but Rsig is present and Zb is either (2) or (3)
+            cout << "\nCase 2: Rb is absent but Rsig is present\n";
             if (Zb == 1) { // beta is large
-                GAIN = Rsig * (Zc/Ze);
+                cout << "Avo = " << Zc/Ze << " V/V";
+                GAIN = (Zc/Ze); // Omit Rsig
             } else { // beta is some value
-                GAIN = (Zb * Rc)/((Zb + Rsig)*Ze);  
+                cout << "Avo = " << Zc/(Ze + (Rsig/(Beta + 1))) << " V/V";
+                GAIN = (Zb * Zc)/((Zb + Rsig)*Ze);  
             }
         } else {
             // Subcase 4: If both Rsig and Rb are both present
             cout << "\nCase 4\n";
+            cout << "Avo = " << Zc/Ze << " V/V";
             GAIN = (Zb/(Zb + Rsig)) * (Zc/Ze); // Zb = RRB||Rb or Zb = Rb
         }
     }
@@ -198,11 +203,12 @@ void Emitter_Follower(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, f
         GAIN = (Zb/(Zb + Rsig)) * Av; // Zb = RRB = (RE+re)(Beta + 1) or Zb = Rb||RRB
     } 
     
-    cout << "GAIN = " << GAIN << " V/V"; 
+    cout << "GAIN = Gv = " << GAIN << " V/V"; 
 }
 
 void General_BJT(float &Rsig, float &Rb, float &Rc, float &Re, float &RL, float &Ic, float &Beta) {
     int V_TH = 0.025; // Thermal voltage constant equal to 25mV
+    // GAIN = 
 }
 
 void BJT_PROMPT() {
