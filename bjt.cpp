@@ -71,7 +71,7 @@ int main()
     }
     cout << "You entered RC = " << RC << " Ohms\n\n";
     
-    cout << "What is the value of VEE?\nVEE = ";
+    cout << "What is the value of VEE? (Enter as a positive value)\nVEE = ";
     cin >> VEE;
     if (cin.fail()) {
         cout << "Invalid input\n";
@@ -103,13 +103,13 @@ int main()
         Ie = (VBB - Vbe - VEE)/RE; // See EX5
         Ic = Ie;
     } else { // calculations for a given beta
-        Ib = (VBB - VEE - Vbe)/(RB + ((beta + 1) * RE));
+        Ib = (VBB + VEE - Vbe)/(RB + ((beta + 1) * RE)); //should be + VEE?
         Ie = (beta + 1) * Ib;
         Ic = beta * Ib;
     }
 
     // Calculate Vce and check if the BJT is active or saturated
-    float Vce_check = VCC - (RC*Ic) - (RE*Ie) - VEE;
+    float Vce_check = VCC - (RC*Ic) - (RE*Ie) + VEE;
 
     if (Vce_check < Vce) {
       cout << "\nThe BJT is operating in the SATURATION REGION\n";
@@ -123,10 +123,10 @@ int main()
 
       a1 = RB + RE;
       b1 = RE;
-      c1 = VBB - Vbe - VEE;
+      c1 = VBB - Vbe + VEE;
       a2 = RE;
       b2 = RC + RE;
-      c2 = VCC - Vce - VEE;
+      c2 = VCC - Vce + VEE;
 
       // Find Ib and Ic via cross-multiplication
       float x, y;
@@ -136,9 +136,9 @@ int main()
       Ib = abs(x);
       Ic = abs(y);
       Ie = Ib + Ic;
-      cout << "\n\nIb = " << Ib;
-      cout << "\n\nIc = " << Ic;
-      cout << "\n\nIe = " << Ie;
+      cout << "\n\nIb = " << Ib*1e3 << " mA";
+      cout << "\n\nIc = " << Ic*1e3 << " mA";
+      cout << "\n\nIe = " << Ie*1e3 << " mA";
 
       // Find the voltages Vb, Vc, Ve
       Ve = (RE * Ie) - VEE;
@@ -158,7 +158,7 @@ int main()
       cout << "\nThe BJT is operating in the ACTIVE REGION";
       Vb = VBB - (RB*Ib);
       Vc = VCC - (RC*Ic);
-      Ve = (RE*Ie) + VEE; // Double Check
+      Ve = (RE*Ie) - VEE; // Double Check (True if you enter VEE as a positive integer)
 
       // Show the final results
       cout << "\n\nSummary: \n ";
